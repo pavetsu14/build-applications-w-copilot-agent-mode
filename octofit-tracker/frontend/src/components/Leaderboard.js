@@ -1,24 +1,36 @@
 import React, { useEffect, useState } from 'react';
 
-const codespace = process.env.REACT_APP_CODESPACE_NAME || process.env.CODESPACE_NAME || 'localhost';
-const endpoint = codespace === 'localhost'
-  ? 'http://localhost:8000/api/leaderboard/'
-  : `https://${codespace}-8000.app.github.dev/api/leaderboard/`;
-console.log('Leaderboard endpoint:', endpoint);
+const isDev = process.env.NODE_ENV !== 'production';
+const codespaceName = process.env.REACT_APP_CODESPACE_NAME;
+const baseUrl = codespaceName
+  ? `https://${codespaceName}-8000.app.github.dev`
+  : 'http://localhost:8000';
+const endpoint = `${baseUrl}/api/leaderboard/`;
+if (isDev) {
+  console.log('Leaderboard endpoint:', endpoint);
+}
 
 function Leaderboard() {
   const [leaders, setLeaders] = useState([]);
 
   useEffect(() => {
-    console.log('Fetching from:', endpoint);
+    if (isDev) {
+      console.log('Fetching from:', endpoint);
+    }
     fetch(endpoint)
       .then(res => res.json())
       .then(data => {
         const results = Array.isArray(data) ? data : data.results || [];
         setLeaders(results);
-        console.log('Fetched leaderboard:', data);
+        if (isDev) {
+          console.log('Fetched leaderboard:', data);
+        }
       })
-      .catch(err => console.error('Error fetching leaderboard:', err));
+      .catch(err => {
+        if (isDev) {
+          console.error('Error fetching leaderboard:', err);
+        }
+      });
   }, []);
 
   return (

@@ -1,20 +1,33 @@
 import React, { useEffect, useState } from 'react';
 
-const endpoint = `https://${process.env.REACT_APP_CODESPACE_NAME}-8000.app.github.dev/api/workouts/`;
+const isDev = process.env.NODE_ENV !== 'production';
+const codespaceName = process.env.REACT_APP_CODESPACE_NAME;
+const baseUrl = codespaceName
+  ? `https://${codespaceName}-8000.app.github.dev`
+  : 'http://localhost:8000';
+const endpoint = `${baseUrl}/api/workouts/`;
 
 function Workouts() {
   const [workouts, setWorkouts] = useState([]);
 
   useEffect(() => {
-    console.log('Fetching from:', endpoint);
+    if (isDev) {
+      console.log('Fetching from:', endpoint);
+    }
     fetch(endpoint)
       .then(res => res.json())
       .then(data => {
         const results = Array.isArray(data) ? data : data.results || [];
         setWorkouts(results);
-        console.log('Fetched workouts:', data);
+        if (isDev) {
+          console.log('Fetched workouts:', data);
+        }
       })
-      .catch(err => console.error('Error fetching workouts:', err));
+      .catch(err => {
+        if (isDev) {
+          console.error('Error fetching workouts:', err);
+        }
+      });
   }, []);
 
   return (
