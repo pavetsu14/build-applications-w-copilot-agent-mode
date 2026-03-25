@@ -1,5 +1,3 @@
-# Custom user model
-AUTH_USER_MODEL = 'octofit_tracker.User'
 """
 Django settings for octofit_tracker project.
 
@@ -12,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -22,15 +21,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-4juwwn1r@^bfp=$0k5qf5eelc-+@)v%8*r)me#rftw&z-b*=@d'
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-4juwwn1r@^bfp=$0k5qf5eelc-+@)v%8*r)me#rftw&z-b*=@d')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DJANGO_DEBUG', 'False').lower() in ('true', '1')
 
 
 
 # Allow codespace URL and localhost
-import os
 codespace_name = os.environ.get('CODESPACE_NAME')
 if codespace_name:
     ALLOWED_HOSTS = [
@@ -109,10 +107,40 @@ DATABASES = {
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
 # CORS settings
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = ['*']
-CORS_ALLOW_METHODS = ['*']
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+]
+if codespace_name:
+    CORS_ALLOWED_ORIGINS.append(
+        f"https://{codespace_name}-3000.app.github.dev"
+    )
+
+CORS_ALLOW_HEADERS = [
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
+
+# Custom user model
+AUTH_USER_MODEL = 'octofit_tracker.User'
 
 
 # Password validation
