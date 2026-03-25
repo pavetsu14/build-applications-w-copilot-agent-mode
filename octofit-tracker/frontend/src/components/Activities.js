@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from 'react';
 
-const endpoint = `https://${process.env.REACT_APP_CODESPACE_NAME}-8000.app.github.dev/api/activities/`;
+const codespace = process.env.REACT_APP_CODESPACE_NAME || process.env.CODESPACE_NAME || 'localhost';
+const endpoint = codespace === 'localhost'
+  ? 'http://localhost:8000/api/activities/'
+  : `https://${codespace}-8000.app.github.dev/api/activities/`;
+console.log('Activities endpoint:', endpoint);
 
 function Activities() {
   const [activities, setActivities] = useState([]);
@@ -20,11 +24,43 @@ function Activities() {
   return (
     <div>
       <h2>Activities</h2>
-      <ul>
-        {activities.map((activity, idx) => (
-          <li key={activity.id || idx}>{activity.name || JSON.stringify(activity)}</li>
-        ))}
-      </ul>
+      {activities.length > 0 ? (
+        <table style={{ borderCollapse: 'collapse', width: '100%' }}>
+          <thead>
+            <tr>
+              {Object.keys(activities[0]).map((key) => (
+                <th key={key} style={{ border: '1px solid #ccc', padding: '8px', background: '#f5f5f5' }}>{key}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {activities.map((activity, idx) => (
+              <tr key={activity.id || idx}>
+                {Object.keys(activities[0]).map((key) => {
+                  const value = activity[key];
+                  if (typeof value === 'object' && value !== null) {
+                    // Special handling for nested objects (e.g., user, team)
+                    if (value.username) {
+                      // User object
+                      return <td key={key} style={{ border: '1px solid #ccc', padding: '8px' }}>{value.username}</td>;
+                    } else if (value.name) {
+                      // Team object
+                      return <td key={key} style={{ border: '1px solid #ccc', padding: '8px' }}>{value.name}</td>;
+                    } else {
+                      // Fallback: JSON stringify
+                      return <td key={key} style={{ border: '1px solid #ccc', padding: '8px' }}>{JSON.stringify(value)}</td>;
+                    }
+                  } else {
+                    return <td key={key} style={{ border: '1px solid #ccc', padding: '8px' }}>{value}</td>;
+                  }
+                })}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : (
+        <p>No activities found.</p>
+      )}
     </div>
   );
 }

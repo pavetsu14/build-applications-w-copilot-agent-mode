@@ -9,12 +9,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         User = get_user_model()
-        # Clear existing data
-        User.objects.all().delete()
-        app_models.Team.objects.all().delete()
-        app_models.Activity.objects.all().delete()
-        app_models.Leaderboard.objects.all().delete()
-        app_models.Workout.objects.all().delete()
+        # Clear existing data safely (avoid unhashable error)
+        User.objects.filter(pk__isnull=False).delete()
+        app_models.Team.objects.filter(pk__isnull=False).delete()
+        app_models.Activity.objects.filter(pk__isnull=False).delete()
+        app_models.Leaderboard.objects.filter(pk__isnull=False).delete()
+        app_models.Workout.objects.filter(pk__isnull=False).delete()
 
         # Create Teams
         marvel = app_models.Team.objects.create(name='Marvel')
